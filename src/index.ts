@@ -308,12 +308,18 @@ function getMappedPath(
       const tsExt = jsExt.replace('js', 'ts')
       const basename = source.replace(JS_EXT_PATTERN, '')
 
-      const resolved =
+      let resolved =
         getMappedPath(basename + tsExt, file) ||
         getMappedPath(
           basename + '.d' + (tsExt === '.tsx' ? '.ts' : tsExt),
           file,
         )
+
+      // Support ".tsx" emitted as ".js" in path aliases (import-js/eslint-import-resolver-typescript#234)
+      // Docs: https://www.typescriptlang.org/tsconfig#jsx
+      if (!resolved && jsExt === '.js') {
+        resolved = getMappedPath(basename + '.tsx', file)
+      }
 
       if (resolved) {
         return resolved
